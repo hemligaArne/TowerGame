@@ -16,6 +16,8 @@ package
 		private var _top:uint;
 		private var _bottom:uint;
 		
+		private var _projectileShot:Projectile;
+		private var _projectiles:Array = [];
 		private var _friction:Number = 1;//0.99;
 
 		// dev variables ADD THESE TO CONSTRUCTOR PARAMETERS.
@@ -85,6 +87,12 @@ package
 				aimTowersAtEnemies(_towers[j]);
 			}
 			
+			for (var k:uint = 0; k < _projectiles.length; k++)
+			{
+				_projectiles[k].getChildAt(0).x += _projectiles[k].speed;
+			}
+//			outOfBoundsCheckDelete(_projectiles);
+			
 		}
 		//####################################################
 		//
@@ -94,7 +102,7 @@ package
 		
 		private function outOfBoundsCheck (_arr:Array):void{
 			//trace("Tower_vs_Invador::outOfBoundsCheck");
-			for ( var i=0; i<_arr.length; i++ ) {
+			for ( var i:uint =0; i<_arr.length; i++ ) {
 				if(_arr[i].x - _arr[i].width / 2 > _right )
 				{
 					_arr[i].x = _left - _arr[i].width / 2;
@@ -110,6 +118,30 @@ package
 				else if (_arr[i].y + _arr[i].height / 2 < _top)
 				{
 					_arr[i].y = _bottom + _arr[i].height / 2;
+				}
+				
+			};
+		}
+		
+		private function outOfBoundsCheckDelete (_arr:Array):void
+		{
+			trace("Tower_vs_Invador::outOfBoundsCheckDelete");
+			for ( var i:uint = _arr.length ; i > 1; i-- ) {
+				if(_arr[i].x - _arr[i].width / 2 > _right )
+				{
+					_arr.splice(i, 1);
+				}
+				else if (_arr[i].x + _arr[i].width / 2 < _left)
+				{
+					_arr.splice(i, 1);
+				}
+				if(_arr[i].y - _arr[i].height / 2 > _bottom )
+				{
+					_arr.splice(i, 1);
+				}
+				else if (_arr[i].y + _arr[i].height / 2 < _top)
+				{
+					_arr.splice(i, 1);
 				}
 				
 			};
@@ -141,10 +173,8 @@ package
 			shortestLength[1] = Math.sqrt(tempDX * tempDX + tempDY * tempDY);
 			shortestLength[2] = tempDX;
 			shortestLength[3] = tempDY;
-//			shortestLength[1] = Math.atan2(dy, dx);
 			for (var i:uint = 1 ; i < invadorLength ; i++ )
 			{
-				trace("invadors is " + i);
 				tempDX = _invadors[i].x - $thisTower.x;
 			 	tempDY = _invadors[i].y - $thisTower.y;
 				tempDistance = Math.sqrt(tempDX * tempDX + tempDY * tempDY);
@@ -155,16 +185,42 @@ package
 					shortestLength[2] = tempDX;
 					shortestLength[3] = tempDY;
 				}
-//				var _invadors.x - $thisTower.x;
 			}
 			
-			$thisTower.rotation = Math.atan2(shortestLength[3], shortestLength[2]) * (180 / Math.PI)
+			$thisTower.rotation = Math.atan2(shortestLength[3], shortestLength[2]) * (180 / Math.PI);
+			if(shortestLength[1] < $thisTower._fireRange)
+			{
+				//tower fire
+				if ($thisTower.fireAtWill == true)
+				{
+					$thisTower.commenceFire();
+					_projectileShot = new Projectile($thisTower.rotation, $thisTower.ammunitionType);
+					addChild(_projectileShot);
+					_projectileShot.x = $thisTower.x;
+					_projectileShot.y = $thisTower.y;
+					_projectileShot.rotation = $thisTower.rotation;
+					_projectiles.push(_projectileShot);
+					projectilesCoordination();
+					//_projectileShot = new Projectile();
+				}
+			}
+			
 			// tower "pointing" at the invador
 //			var dx:Number = _invador.x - _tower.x;
 //			var dy:Number = _invador.y - _tower.y;
 //			_tower  = Math.atan2(dy, dx) * (180 / Math.PI);
 			
 		}
+		
+		private function projectilesCoordination ():void{
+			trace("Tower_vs_Invador::projectilesCoordination");
+			for ( var i=0; i<_projectiles.length; i++ ) {
+				trace("\t_projectiles[i].x is: "+_projectiles[i].x);
+				trace("\t_projectiles[i].y is: "+_projectiles[i].y);
+			};
+			
+		}
+		
 		
 	}
 }
