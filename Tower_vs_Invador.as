@@ -89,9 +89,11 @@ package
 			
 			for (var k:uint = 0; k < _projectiles.length; k++)
 			{
-				_projectiles[k].getChildAt(0).x += _projectiles[k].speed;
+				//_projectiles[k].getChildAt(0).x += _projectiles[k].speed;
+				_projectiles[k].x += _projectiles[k].vx;
+				_projectiles[k].y += _projectiles[k].vy;
 			}
-//			outOfBoundsCheckDelete(_projectiles);
+			outOfBoundsCheckDelete(_projectiles);
 			
 		}
 		//####################################################
@@ -125,22 +127,28 @@ package
 		
 		private function outOfBoundsCheckDelete (_arr:Array):void
 		{
-			trace("Tower_vs_Invador::outOfBoundsCheckDelete");
-			for ( var i:uint = _arr.length ; i > 1; i-- ) {
+//			trace("\t_right is: "+_right);
+//			trace("\t_arr[0].width is: "+_arr[0].width);
+//			trace("Tower_vs_Invador::outOfBoundsCheckDelete");
+			for ( var i:uint = _arr.length - 1 ; i > 1; i-- ) {
 				if(_arr[i].x - _arr[i].width / 2 > _right )
 				{
+					_arr[i] = null;
 					_arr.splice(i, 1);
 				}
 				else if (_arr[i].x + _arr[i].width / 2 < _left)
 				{
+					_arr[i] = null;
 					_arr.splice(i, 1);
 				}
 				if(_arr[i].y - _arr[i].height / 2 > _bottom )
 				{
+					_arr[i] = null;
 					_arr.splice(i, 1);
 				}
 				else if (_arr[i].y + _arr[i].height / 2 < _top)
 				{
+					_arr[i] = null;
 					_arr.splice(i, 1);
 				}
 				
@@ -198,7 +206,7 @@ package
 					addChild(_projectileShot);
 					_projectileShot.x = $thisTower.x;
 					_projectileShot.y = $thisTower.y;
-					_projectileShot.rotation = $thisTower.rotation;
+// 					_projectileShot.rotation = $thisTower.rotation;
 					_projectiles.push(_projectileShot);
 					projectilesCoordination();
 					//_projectileShot = new Projectile();
@@ -215,10 +223,10 @@ package
 		private function projectilesCoordination ():void{
 			trace("Tower_vs_Invador::projectilesCoordination");
 			for ( var i=0; i<_projectiles.length; i++ ) {
-				trace("\t_projectiles[i].x is: "+_projectiles[i].x);
-				trace("\t_projectiles[i].y is: "+_projectiles[i].y);
+//				trace("\t_projectiles[i].x is: "+_projectiles[i].x);
+//				trace("\t_projectiles[i].y is: "+_projectiles[i].y);
 			};
-			
+			trace("\t_projectiles.length is: "+_projectiles.length);
 		}
 		
 		

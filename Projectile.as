@@ -29,9 +29,13 @@ package
 */		
 		private var _projectileGraphic:Class;
 		
+		internal var vx:Number;
+		internal var vy:Number;
+		
 		private var _angle:Number;
 		private var _type:String;
 		public var speed:Number = 10;
+		
 		
 //		public function Projectile()		
 		public function Projectile($angle:Number, $type:String)
@@ -48,6 +52,11 @@ package
 			addChild(_projectileGraphic);
 			_projectileGraphic.x -= _projectileGraphic.width;
 			_projectileGraphic.y -= _projectileGraphic.height;
+			
+			vx = Math.cos(_angle * Math.PI / 180) * speed;
+			vy = Math.sin(_angle * Math.PI / 180) * speed;
+			trace("\tvx is: "+vx);
+			trace("\tvy is: "+vy);
 //			_projectileGraphic.rotation = _angle;
 			
 		}
