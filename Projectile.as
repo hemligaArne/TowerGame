@@ -2,6 +2,8 @@ package
 {
 	import flash.display.Sprite;
 	import flash.display.Bitmap;
+	import flash.display.BitmapData;
+	import flash.geom.Rectangle;
 	
 	public class Projectile extends Sprite
 	{
@@ -35,6 +37,8 @@ package
 		private var _angle:Number;
 		private var _type:String;
 		public var speed:Number = 10;
+		private var _damage:Number = 5;
+		public var projectileClipBmpData:BitmapData;
 		
 		
 //		public function Projectile()		
@@ -55,8 +59,12 @@ package
 			
 			vx = Math.cos(_angle * Math.PI / 180) * speed;
 			vy = Math.sin(_angle * Math.PI / 180) * speed;
-			trace("\tvx is: "+vx);
-			trace("\tvy is: "+vy);
+			
+			var bulletRect:Rectangle = _projectileGraphic.getBounds(this);
+			projectileClipBmpData = new BitmapData(bulletRect.width, bulletRect.height, true, 0);
+			projectileClipBmpData.draw(_projectileGraphic);
+//			trace("\tvx is: "+vx);
+//			trace("\tvy is: "+vy);
 //			_projectileGraphic.rotation = _angle;
 			
 		}

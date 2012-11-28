@@ -3,6 +3,7 @@ package
 	import flash.display.Sprite;
 	import flash.events.MouseEvent;
 	import flash.events.Event;
+	import flash.geom.Point;
 	
 	public class Tower_vs_Invador extends Sprite
 	{
@@ -21,8 +22,6 @@ package
 		private var _friction:Number = 1;//0.99;
 
 		// dev variables ADD THESE TO CONSTRUCTOR PARAMETERS.
-		
-		
 		public function Tower_vs_Invador()
 		{
 			init();
@@ -93,7 +92,11 @@ package
 				_projectiles[k].x += _projectiles[k].vx;
 				_projectiles[k].y += _projectiles[k].vy;
 			}
-			outOfBoundsCheckDelete(_projectiles);
+			if(_projectiles.length > 0)
+			{
+				outOfBoundsCheckDelete(_projectiles);
+				hitTests(_projectiles, _invadors);
+			}
 			
 		}
 		//####################################################
@@ -133,28 +136,69 @@ package
 			for ( var i:uint = _arr.length - 1 ; i > 1; i-- ) {
 				if(_arr[i].x - _arr[i].width / 2 > _right )
 				{
+					removeChild(_arr[i]);
 					_arr[i] = null;
 					_arr.splice(i, 1);
+					i--;
+					if(i == 0) break;
 				}
 				else if (_arr[i].x + _arr[i].width / 2 < _left)
 				{
+					removeChild(_arr[i]);
 					_arr[i] = null;
 					_arr.splice(i, 1);
+					i--;
+					if(i == 0) break;
 				}
 				if(_arr[i].y - _arr[i].height / 2 > _bottom )
 				{
+					removeChild(_arr[i]);
 					_arr[i] = null;
 					_arr.splice(i, 1);
+					i--;
+					if(i == 0) break;
 				}
 				else if (_arr[i].y + _arr[i].height / 2 < _top)
 				{
+					removeChild(_arr[i]);
 					_arr[i] = null;
 					_arr.splice(i, 1);
+					i--;
+					if(i == 0) break;
 				}
 				
 			};
 		}
-		
+		private function hitTests ($projectile:Array, $target:Array):void{
+//			trace("Tower_vs_Invador::hitTests");
+//			trace("\t$target[0].health is: "+$target[0].health);
+			var targetHit:Boolean = false;
+				if($target.length == 1) trace("only one left???");
+			for(var i:uint = $projectile.length - 1; i > 0 ; i--)
+			{
+				if($target.length == 1) trace("outer loop");
+				for (var j:uint = $target.length - 1 ; j > 0; j--)
+				{
+					if($target.length == 1) trace("inner loop");
+					if($target[j].characterBmpData.hitTest (new Point ( $target[j].x, $target[j].y), 255, 
+						$projectile[i].projectileClipBmpData, new Point ( $projectile[i].x, $projectile[i].y ), 255 ))
+						{
+							trace("\t\thit");
+							var temp:WalkingInvador = $target[j];
+							removeChild(temp);
+							$target.splice(j, 1);
+							temp = null;
+							var temp2:Projectile = $projectile[i];
+							removeChild(temp2);
+							temp2 = null;
+							$projectile.splice(i, 1);
+							
+							//targetHit = true;						
+						}
+				}
+				
+			}
+		}
 		private function brownianMotion(_sprite:WalkingInvador):void
 		{
 			var oldLocationX:Number = _sprite.x;
