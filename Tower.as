@@ -35,8 +35,8 @@ package
 		}
 		
 		private function init ():void{
-			trace("Tower::init");
-			_fireRange = 200;
+//			trace("Tower::init");
+			_fireRange = 500;
 		}
 		
 		public function commenceFire():void
@@ -48,13 +48,13 @@ package
 		}
 		
 		private function towerReloaded (e:TimerEvent):void{
-			trace("Tower::towerReloaded");
+//			trace("Tower::towerReloaded");
 			e.currentTarget.stop();
 			e.currentTarget.removeEventListener(TimerEvent.TIMER, towerReloaded);
 			fireAtWill = true;
 		}
 		private function drawPointer ():void{
-			trace("Tower::drawPointer");
+//			trace("Tower::drawPointer");
 			graphics.lineStyle(1);
 			graphics.moveTo(0, 0);
 			graphics.lineTo(50, 0);

@@ -4,18 +4,22 @@ package
 	import flash.events.MouseEvent;
 	import flash.events.Event;
 	import flash.geom.Point;
+	import flash.text.*;
 	
 	public class Tower_vs_Invador extends Sprite
 	{
-		private var _tower:Tower = new Tower();
+		var numInvadors:uint = 3;
+		private var _victory:Boolean = false;
+		
+		private var _tower:Tower;
 		private var _towers:Array = [];
 		private var _invador:WalkingInvador;
 		private var _invadors:Array = [];
 		
-		private var _left:uint;
-		private var _right:uint;
-		private var _top:uint;
-		private var _bottom:uint;
+		private var _left:Number;
+		private var _right:Number;
+		private var _top:Number;
+		private var _bottom:Number;
 		
 		private var _projectileShot:Projectile;
 		private var _projectiles:Array = [];
@@ -28,8 +32,51 @@ package
 			initTower();
 			initInvaders();
 			stage.addEventListener(Event.ENTER_FRAME, onEnterFrameHandler)
+			devInits();// tools to help during build
+			
+		}
+		//####################################################
+		//
+		//                     DEV INIT'S
+		//
+		//####################################################
+		private function devInits ():void{
+			trace("Tower_vs_Invador::devInits");
+			createButtons();
 		}
 		
+		public function createButtons():void
+		{
+			var butt:Sprite = new Sprite();
+			butt.graphics.beginFill(0xbbbbbb);
+			butt.graphics.drawRect(0, 0, 200, 30);
+			butt.graphics.endFill();
+
+			addChild(butt);
+			var txt:TextField = new TextField();
+			txt.text = "bullet Count";
+
+			var alignedFormat:TextFormat = new TextFormat();
+			alignedFormat.align = TextFormatAlign.CENTER;
+			txt.defaultTextFormat = alignedFormat;
+			butt.addChild(txt);
+			
+			butt.addEventListener(MouseEvent.CLICK, buttClick);
+			butt.buttonMode = true;
+			butt.mouseChildren = false;
+		}
+
+		private function buttClick(e:MouseEvent):void
+		{
+			trace("\t\t\tbullets are " + _projectiles.length);
+			for ( var i=0; i<_projectiles.length; i++ ) {
+				trace("\t_projectiles[i].x is: "+_projectiles[i].x);
+				trace("\t_projectiles[i].y is: "+_projectiles[i].y);
+			};
+			trace("running out of bounds and delete text");
+			outOfBoundsCheckDelete(_projectiles);
+			trace("\t\t\tbullets are " + _projectiles.length);
+		}
 		
 		//####################################################
 		//
@@ -46,7 +93,7 @@ package
 		}
 		
 		private function initTower ():void{
-			//trace("::init");
+			trace("::init -- init of tower CORRECT TOWER");
 			_tower = new Tower();
 			addChild(_tower);
 			_tower.x = stage.stageWidth / 2;
@@ -55,7 +102,7 @@ package
 		}
 		private function initInvaders ():void{
 			//trace("Rotation::initInvadors");
-			var numInvadors:uint = 5;
+			var numInvadors:uint = 15;
 			for ( var i:uint = 0; i<numInvadors; i++ ) {
 				_invador = new WalkingInvador();
 				addChild(_invador);
@@ -75,6 +122,7 @@ package
 		//####################################################
 		
 		private function onEnterFrameHandler (e:Event):void{
+			// this moves the invadors
 			for(var i:uint = 0; i< _invadors.length; i++)
 			{
 				brownianMotion(_invadors[i]);
@@ -83,6 +131,7 @@ package
 			
 			for (var j:uint= 0; j < _towers.length; j++)
 			{
+				
 				aimTowersAtEnemies(_towers[j]);
 			}
 			
@@ -94,8 +143,20 @@ package
 			}
 			if(_projectiles.length > 0)
 			{
+//				trace("\t_projectiles.length is: "+_projectiles.length);
 				outOfBoundsCheckDelete(_projectiles);
 				hitTests(_projectiles, _invadors);
+				if(_invadors.length == 0)
+				{
+					_victory = true;
+					trace("\t\t\t\t V * I * C * T * O * R * Y");
+					//stage.removeEventListener(Event.ENTER_FRAME, onEnterFrameHandler)
+				}
+			}
+			if ( _projectiles.length == 0 && _invadors.length == 0)
+			{
+				stage.removeEventListener(Event.ENTER_FRAME, onEnterFrameHandler)
+				// dispatch BATTLE_WON event
 			}
 			
 		}
@@ -130,73 +191,46 @@ package
 		
 		private function outOfBoundsCheckDelete (_arr:Array):void
 		{
-//			trace("\t_right is: "+_right);
-//			trace("\t_arr[0].width is: "+_arr[0].width);
 //			trace("Tower_vs_Invador::outOfBoundsCheckDelete");
-			for ( var i:uint = _arr.length - 1 ; i > 1; i-- ) {
-				if(_arr[i].x - _arr[i].width / 2 > _right )
+			for ( var i:uint = _arr.length ; i > 0; i--) 
+			{
+				var j:uint = i - 1;
+				var removeFlag:Boolean = false;
+				if(_arr[j].x - _arr[j].width / 2 > _right || _arr[j].x + _arr[j].width / 2 < _left || _arr[j].y - _arr[j].height / 2 > _bottom  ||  _arr[j].y + _arr[j].height / 2 < _top)
 				{
-					removeChild(_arr[i]);
-					_arr[i] = null;
-					_arr.splice(i, 1);
-					i--;
-					if(i == 0) break;
+					removeFlag = true;
 				}
-				else if (_arr[i].x + _arr[i].width / 2 < _left)
-				{
-					removeChild(_arr[i]);
-					_arr[i] = null;
-					_arr.splice(i, 1);
-					i--;
-					if(i == 0) break;
-				}
-				if(_arr[i].y - _arr[i].height / 2 > _bottom )
-				{
-					removeChild(_arr[i]);
-					_arr[i] = null;
-					_arr.splice(i, 1);
-					i--;
-					if(i == 0) break;
-				}
-				else if (_arr[i].y + _arr[i].height / 2 < _top)
-				{
-					removeChild(_arr[i]);
-					_arr[i] = null;
-					_arr.splice(i, 1);
-					i--;
-					if(i == 0) break;
-				}
-				
+				if (removeFlag == true) removeContent(j);
 			};
+			function removeContent(count:uint):void
+			{
+				removeChild(_arr[count]);
+				_arr[count] = null;
+				_arr.splice(count, 1);
+			}
 		}
 		private function hitTests ($projectile:Array, $target:Array):void{
 //			trace("Tower_vs_Invador::hitTests");
-//			trace("\t$target[0].health is: "+$target[0].health);
 			var targetHit:Boolean = false;
-				if($target.length == 1) trace("only one left???");
-			for(var i:uint = $projectile.length - 1; i > 0 ; i--)
+			for(var i:uint = $projectile.length; i > 0 ; i--)
 			{
-				if($target.length == 1) trace("outer loop");
-				for (var j:uint = $target.length - 1 ; j > 0; j--)
+				var i_index:uint = i - 1;
+				for (var j:uint = $target.length; j > 0; j--)
 				{
-					if($target.length == 1) trace("inner loop");
-					if($target[j].characterBmpData.hitTest (new Point ( $target[j].x, $target[j].y), 255, 
-						$projectile[i].projectileClipBmpData, new Point ( $projectile[i].x, $projectile[i].y ), 255 ))
-						{
-							trace("\t\thit");
-							var temp:WalkingInvador = $target[j];
-							removeChild(temp);
-							$target.splice(j, 1);
-							temp = null;
-							var temp2:Projectile = $projectile[i];
-							removeChild(temp2);
-							temp2 = null;
-							$projectile.splice(i, 1);
-							
-							//targetHit = true;						
-						}
+					var jindex:uint = j - 1;
+					if($target[jindex].characterBmpData.hitTest (new Point ( $target[jindex].x, $target[jindex].y), 255, 					
+					$projectile[i_index].projectileClipBmpData, new Point ( $projectile[i_index].x, $projectile[i_index].y ), 255 ))
+					{
+						var temp:WalkingInvador = $target[jindex];
+						removeChild(temp);
+						$target.splice(jindex, 1);
+						temp = null;
+						var temp2:Projectile = $projectile[i_index];
+						removeChild(temp2);
+						temp2 = null;
+						$projectile.splice(i_index, 1);
+					}
 				}
-				
 			}
 		}
 		private function brownianMotion(_sprite:WalkingInvador):void
@@ -242,7 +276,7 @@ package
 			$thisTower.rotation = Math.atan2(shortestLength[3], shortestLength[2]) * (180 / Math.PI);
 			if(shortestLength[1] < $thisTower._fireRange)
 			{
-				//tower fire
+				//tower will fire :
 				if ($thisTower.fireAtWill == true)
 				{
 					$thisTower.commenceFire();
@@ -250,29 +284,9 @@ package
 					addChild(_projectileShot);
 					_projectileShot.x = $thisTower.x;
 					_projectileShot.y = $thisTower.y;
-// 					_projectileShot.rotation = $thisTower.rotation;
 					_projectiles.push(_projectileShot);
-					projectilesCoordination();
-					//_projectileShot = new Projectile();
 				}
 			}
-			
-			// tower "pointing" at the invador
-//			var dx:Number = _invador.x - _tower.x;
-//			var dy:Number = _invador.y - _tower.y;
-//			_tower  = Math.atan2(dy, dx) * (180 / Math.PI);
-			
-		}
-		
-		private function projectilesCoordination ():void{
-			trace("Tower_vs_Invador::projectilesCoordination");
-			for ( var i=0; i<_projectiles.length; i++ ) {
-//				trace("\t_projectiles[i].x is: "+_projectiles[i].x);
-//				trace("\t_projectiles[i].y is: "+_projectiles[i].y);
-			};
-			trace("\t_projectiles.length is: "+_projectiles.length);
-		}
-		
-		
+		}		
 	}
 }
